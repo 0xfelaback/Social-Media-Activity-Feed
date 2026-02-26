@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class SocialMediaDataContext(DbContextOptions<SocialMediaDataContext> options) : DbContext(options)
 {
@@ -20,15 +21,15 @@ public class SocialMediaDataContext(DbContextOptions<SocialMediaDataContext> opt
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<FeedContent>().HasIndex(k => new { k.FollowerID, k.FollowedID }).IsUnique();
+        modelBuilder.Entity<FeedContent>().HasIndex(k => new { k.FollowerID, k.FollowedUserID }).IsUnique();
         modelBuilder.Entity<FeedContent>().HasOne(f => f.Follower).WithMany(f => f.FeedContents).HasForeignKey(fk => new { fk.FollowerID });
-        modelBuilder.Entity<FeedContent>().HasOne(f => f.Followed).WithMany(f => f.FeedContentsIn).HasForeignKey(fk => new { fk.FollowedID});
-        
+        modelBuilder.Entity<FeedContent>().HasOne(f => f.Followed).WithMany(f => f.FeedContentsIn).HasForeignKey(fk => new { fk.FollowedUserID });
+
         //many-many entities fk entities
-        modelBuilder.Entity<Follow>().HasKey(f => new { f.FollowerID, f.FollowedID });
-        modelBuilder.Entity<Follow>().HasIndex(f => new { f.FollowedID, f.FollowerID });
+        modelBuilder.Entity<Follow>().HasKey(f => new { f.FollowerID, f.FollowedUserID });
+        modelBuilder.Entity<Follow>().HasIndex(f => new { f.FollowedUserID, f.FollowerID });
         modelBuilder.Entity<Follow>().HasOne(f => f.Follower).WithMany(k => k.FollowingAccounts).OnDelete(DeleteBehavior.Restrict).HasForeignKey(fk => fk.FollowerID);
-        modelBuilder.Entity<Follow>().HasOne(f => f.Followed).WithMany(k => k.FollowedAccounts).OnDelete(DeleteBehavior.Restrict).HasForeignKey(fk => fk.FollowedID);
+        modelBuilder.Entity<Follow>().HasOne(f => f.Followed).WithMany(k => k.FollowersAccounts).OnDelete(DeleteBehavior.Restrict).HasForeignKey(fk => fk.FollowedUserID);
 
         modelBuilder.Entity<BlockedAccount>().HasKey(b => new { b.BlockingUserID, b.BlockedAccountId });
         modelBuilder.Entity<BlockedAccount>().HasIndex(b => new { b.BlockedAccountId, b.BlockingUserID });
@@ -44,5 +45,7 @@ public class SocialMediaDataContext(DbContextOptions<SocialMediaDataContext> opt
         modelBuilder.Entity<Message>().HasIndex(m => new { m.ReceiptientID, m.SenderID });
         modelBuilder.Entity<Message>().HasOne(m => m.Sender).WithMany(m => m.MessagesSent).HasForeignKey(fk => fk.SenderID).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Message>().HasOne(m => m.Receiptient).WithMany(m => m.MessagesReceived).HasForeignKey(fk => fk.ReceiptientID).OnDelete(DeleteBehavior.Restrict);
+
+
     }
 }

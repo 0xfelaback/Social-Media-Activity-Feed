@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Social_Media_Activity_Feed.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDataContext))]
-    partial class SocialMediaDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260225012046_ResolveDefaultMistake")]
+    partial class ResolveDefaultMistake
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.1");
@@ -48,8 +51,7 @@ namespace Social_Media_Activity_Feed.Data.Migrations
 
             modelBuilder.Entity("Comment", b =>
                 {
-                    b.Property<long>("commentID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("PostID")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CommentText")
@@ -69,17 +71,12 @@ namespace Social_Media_Activity_Feed.Data.Migrations
                     b.Property<int>("LikeCount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("PostID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("isDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("commentID");
+                    b.HasKey("PostID");
 
                     b.HasIndex("CommenterID");
-
-                    b.HasIndex("PostID");
 
                     b.ToTable("Comments");
                 });
@@ -174,29 +171,23 @@ namespace Social_Media_Activity_Feed.Data.Migrations
 
             modelBuilder.Entity("Notification", b =>
                 {
-                    b.Property<long>("NotificationID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("ReceivingUserID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("InitaiatorID")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("InitaiatorID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("NotificationType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ReceivingUserID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("NotificationID");
+                    b.HasKey("ReceivingUserID", "InitaiatorID");
 
                     b.HasIndex("InitaiatorID");
 
                     b.HasIndex("NotificationType");
-
-                    b.HasIndex("ReceivingUserID", "InitaiatorID");
 
                     b.ToTable("Notifications");
                 });

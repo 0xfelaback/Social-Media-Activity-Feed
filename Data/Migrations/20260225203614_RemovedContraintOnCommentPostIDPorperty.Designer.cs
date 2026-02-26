@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Social_Media_Activity_Feed.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDataContext))]
-    partial class SocialMediaDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260225203614_RemovedContraintOnCommentPostIDPorperty")]
+    partial class RemovedContraintOnCommentPostIDPorperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.1");

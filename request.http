@@ -1,3 +1,96 @@
-GET http://localhost:5074
+POST http://localhost:5074/api/register
+Content-Type: application/json
+
+{
+        "UserName" : "felaback",
+        "FirstName" : "Daniel",
+        "LastName" : "Onuchukwu",
+        "PasswordHash" : "1234"
+}
 ###
-GET https://jsonplaceholder.typicode.com/users
+
+POST http://localhost:5074/api/register
+Content-Type: application/json
+
+{
+        "UserName" : "estherchucks",
+        "FirstName" : "esther",
+        "LastName" : "chucks",
+        "PasswordHash" : "1234"
+}
+
+###
+DELETE http://localhost:5074/api/users/clementchucks/follow
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJleHAiOjE3NzIwNzg1NjcsInN1YiI6IjMiLCJ1bmlxdWVfbmFtZSI6ImVzdGhlcmNodWNrcyIsImVtYWlsIjoiIiwicGhvbmVfbnVtYmVyIjoiIiwiaWF0IjoxNzcyMDc0OTY4LCJuYmYiOjE3NzIwNzQ5Njh9.EWSM1Udy2_95OUJGr0ugH1rrZzZKGIOQjghTaYz_6EE
+
+{
+        "userName": "estherchucks"
+}
+
+###
+POST http://localhost:5074/api/login
+Content-Type: application/json
+
+{
+        "username": "estherchucks",
+        "providedPassword": "1234"
+}
+###
+GET http://localhost:5074
+
+###
+GET http://localhost:5074/api/users/felaback/followers
+Content-Type: application/json
+Authorization: Bearer ey
+
+###
+POST http://localhost:5074/api/users/clementchucks/block
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJleHAiOjE3NzIwNzg1NjcsInN1YiI6IjMiLCJ1bmlxdWVfbmFtZSI6ImVzdGhlcmNodWNrcyIsImVtYWlsIjoiIiwicGhvbmVfbnVtYmVyIjoiIiwiaWF0IjoxNzcyMDc0OTY4LCJuYmYiOjE3NzIwNzQ5Njh9.EWSM1Udy2_95OUJGr0ugH1rrZzZKGIOQjghTaYz_6EE
+
+{
+        "userName": "estherchucks"
+}
+
+###
+POST http://localhost:5074/api/posts
+Content-Type: application/json
+Authorization: Bearer e
+
+{
+        "userName": "felaback",
+        "caption": "This is what my dog looks like every mourning 🐶❤️",
+        "PostMediasLinkInputs": [
+                {
+                        "mediaType": 0,
+                        "mediaURL": "https://www.google.com/imgres?q=dog&imgurl=https%3A%2F%2Fhips.hearstapps.com%2Fhmg-prod%2Fimages%2Fdog-puppy-on-garden-royalty-free-image-1586966191.jpg%3Fcrop%3D1xw%3A0.74975xh%3B0%2C0.190xh&imgrefurl=https%3A%2F%2Fwww.goodhousekeeping.com%2Flife%2Fpets%2Fg4531%2Fcutest-dog-breeds%2F&docid=2r6Arj4-hBjhNM&tbnid=SokIeFbyXb1IvM&vet=12ahUKEwjkrq_B6_KSAxWDW0EAHfq5GO8QnPAOegQIExAB..i&w=1999&h=1124&hcb=2&ved=2ahUKEwjkrq_B6_KSAxWDW0EAHfq5GO8QnPAOegQIExAB"
+                }, {
+                        "mediaType": 1,
+                        "mediaURL": "https://www.youtube.com/watch?v=0u_6uM8G174"
+                }
+        ]
+
+}
+###
+GET http://localhost:5074/api/posts/1
+Content-Type: application/json
+Authorization: Bearer e
+
+###
+POST  http://localhost:5074/api/posts/4/like
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJleHAiOjE3NzE5OTY0NDEsInN1YiI6IjMiLCJ1bmlxdWVfbmFtZSI6ImVzdGhlcmNodWNrcyIsImVtYWlsIjoiIiwicGhvbmVfbnVtYmVyIjoiIiwiaWF0IjoxNzcxOTkyODQxLCJuYmYiOjE3NzE5OTI4NDF9.ToNXRXNillzdYBreYGjbmfqCOD1f9qE3M3feXxM4N5k
+
+{
+        "userName": "estherchucks"
+}
+###
+DELETE http://localhost:5074/api/posts/4/comment
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwNzQiLCJleHAiOjE3NzIwNTQ5MjMsInN1YiI6IjMiLCJ1bmlxdWVfbmFtZSI6ImVzdGhlcmNodWNrcyIsImVtYWlsIjoiIiwicGhvbmVfbnVtYmVyIjoiIiwiaWF0IjoxNzcyMDUxMzIzLCJuYmYiOjE3NzIwNTEzMjN9.0X3dLLMPpvT5vgrySudFGaxox9lQ-Ni7W0_KQu7BiO8
+
+{
+        "userName": "estherchucks",
+        "commentText": "I like dogs too😂"
+}

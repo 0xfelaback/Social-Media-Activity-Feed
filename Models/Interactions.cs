@@ -42,7 +42,7 @@ public class FeedContent
     [Key]
     public long UserID { get; set; }
     public long FollowerID { get; set; }
-    public long FollowedID { get; set; }
+    public long FollowedUserID { get; set; }
     public User Follower { get; set; } = null!;
     public User Followed { get; set; } = null!;
     public long PostID { get; set; }
@@ -50,10 +50,12 @@ public class FeedContent
     public Post Post { get; set; } = null!;
 }
 
-[PrimaryKey(nameof(ReceivingUserID), nameof(InitaiatorID))]
+[Index(nameof(ReceivingUserID), nameof(InitaiatorID))]
 [Index(nameof(NotificationType))]
 public class Notification
 {
+    [Key]
+    public long NotificationID { get; set; }
     public long ReceivingUserID { get; set; }
     [ForeignKey(nameof(ReceivingUserID))]
     [InverseProperty(nameof(User.NotificationsReceived))]

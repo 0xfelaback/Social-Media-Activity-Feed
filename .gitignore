@@ -2,3 +2,14 @@ bin
 obj
 .DS_Store
 .$Social Media Activity Feed.drawio.bkp
+.$Social Media Activity Feed - ERD.drawio.bkp
+.$Social Media Activity Feed - ERD.drawio.dtmp
+Database.db-shm
+Database.db-wal
+Database.db
+social.db
+social.db-shm
+social.db-wal
+.fake
+request.http
+doc.txt

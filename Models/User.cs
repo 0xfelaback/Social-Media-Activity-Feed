@@ -8,21 +8,20 @@ public class User
     [Key]
     public long UserID { get; set; }
     [MaxLength(25)]
-    [Required]
+    [Required(ErrorMessage = "Username is a required field")]
     public string UserName { get; set; } = null!;
     [MaxLength(50)]
-    [Required]
+    [Required(ErrorMessage = "Firstname is a required field")]
     public string FirstName { get; set; } = null!;
     [MaxLength(50)]
-    [Required]
+    [Required(ErrorMessage = "Lastname is a required field")]
     public string LastName { get; set; } = null!;
     [EmailAddress(ErrorMessage = "Invalid Email Address.")]
     public string? Email { get; set; }
     [Phone(ErrorMessage = "Invalid Phone Number")]
     public string? PhoneNumber { get; set; }
     [Url(ErrorMessage = "Invalid URL Format")]
-    [Required]
-    public string ProfileImage_MediaUrl { get; set; } = null!;
+    public string? ProfileImage_MediaUrl { get; set; }
     [Required]
     public int FollowersCount { get; set; }
     [Required]
@@ -31,12 +30,17 @@ public class User
     public string? Bio { get; set; }
     [MaxLength(255)]
     [Required]
-    //requires hashing
     public string PasswordHash { get; set; } = null!;
+    [Required]
+    public DateTime CreatedAt { get; set; }
+    [Required]
+    public bool AccountDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    [Required]
     public UserProfile UserProfile { get; set; } = null!;
-    
-    public virtual ICollection<Follow> FollowingAccounts { get; set; } = new List<Follow>();
-    public virtual ICollection<Follow> FollowedAccounts { get; set; } = new List<Follow>();
+
+    public virtual ICollection<Follow> FollowingAccounts { get; set; } = new List<Follow>();// FollowersAccounts
+    public virtual ICollection<Follow> FollowersAccounts { get; set; } = new List<Follow>(); // FollowedAccounts
     public virtual ICollection<BlockedAccount> BlockedAccounts { get; set; } = new List<BlockedAccount>();
     public virtual ICollection<BlockedAccount> AccountBlockedBy { get; set; } = new List<BlockedAccount>();
     public virtual ICollection<CloseFriend> AddedCloseFriends { get; set; } = new List<CloseFriend>();
@@ -53,7 +57,6 @@ public class User
     public virtual ICollection<Notification> NotificationsSent { get; set; } = new List<Notification>();
     public virtual ICollection<FeedContent> FeedContents { get; set; } = new List<FeedContent>();
     public virtual ICollection<FeedContent> FeedContentsIn { get; set; } = new List<FeedContent>();
-    
 }
 
 
@@ -66,9 +69,9 @@ public class UserProfile
     [Required]
     public User User { get; set; } = null!;
     [Url(ErrorMessage = "Invalid URL Format")]
-    public string Website { get; set; } = null!;
+    public string? Website { get; set; }
     [MaxLength(20)]
-    public string Gender { get; set; } = null!;
+    public string? Gender { get; set; }
     [Required]
     public bool PushNotifications { get; set; }
     [Required]
@@ -80,7 +83,7 @@ public class UserProfile
 public class Follow
 {
     public long FollowerID { get; set; }
-    public long FollowedID { get; set; }
+    public long FollowedUserID { get; set; }
     public User Follower { get; set; } = null!;
     public User Followed { get; set; } = null!;
 }
