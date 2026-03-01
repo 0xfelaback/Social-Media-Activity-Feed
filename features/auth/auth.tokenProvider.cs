@@ -6,12 +6,12 @@ using Microsoft.Extensions.Configuration;
 
 public interface ITokenProvider
 {
-    public string Create(User user);
+    public string Create(long userId, string username, string? email, string? phoneNumber);
 }
 
 public class TokenProvider(IConfiguration configuration) : ITokenProvider
 {
-    public string Create(User user)
+    public string Create(long userId, string username, string? email, string? phoneNumber)
     {
         //required to sign the JWT
         string secretKey = configuration["Jwt:Key"] ?? string.Empty;
@@ -24,10 +24,10 @@ public class TokenProvider(IConfiguration configuration) : ITokenProvider
             ([
                 //store statements about user in here
                 // 1. The primary unique identifier (User ID)
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.UserID.ToString()),// 2. Social/Auth identifiers
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.UniqueName, user.UserName),
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.PhoneNumber, user.PhoneNumber ?? string.Empty),
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, userId.ToString()),// 2. Social/Auth identifiers
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.UniqueName, username),
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, email ?? string.Empty),
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.PhoneNumber, phoneNumber ?? string.Empty),
             ]
             ),
             Expires = DateTime.UtcNow.AddMinutes(60),

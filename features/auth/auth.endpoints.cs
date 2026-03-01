@@ -38,14 +38,14 @@ public static class AuthExtension
 
         app.MapPost("/api/login", async (LoginRequest request, SocialMediaDataContext context, IPasswordHasher<string> passwordHasher, ITokenProvider tokenProvider) =>
         {
-            User? user = await context.Users.Where(u => u.UserName == request.Username).FirstOrDefaultAsync();
+            var user = await context.Users.Where(u => u.UserName == request.Username).Select(s => new { s.UserID, s.UserName, s.LastName, s.PhoneNumber, s.PasswordHash, s.Email, s.FirstName, s.ProfileImage_MediaUrl }).FirstOrDefaultAsync();
 
             if (user is null) return Results.NotFound(new AuthResponse { loginResult = null, accessToken = string.Empty });
             var PasswordResult = passwordHasher.VerifyHashedPassword(string.Empty, user.PasswordHash, request.ProvidedPassword ?? string.Empty);
             bool isValid = PasswordResult != PasswordVerificationResult.Failed;
             if (!isValid) return Results.Unauthorized();
 
-            string token = tokenProvider.Create(user);
+            string token = tokenProvider.Create(user.UserID, user.UserName, user.Email, user.PhoneNumber);
             LoginResult resultData = new LoginResult { userID = user.UserID, userName = user.UserName, firstName = user.FirstName, lastName = user.LastName, email = user.Email ?? string.Empty, phoneNumber = user.PhoneNumber ?? string.Empty, profileImage_MediaUrl = user.ProfileImage_MediaUrl ?? string.Empty };
             AuthResponse responseData = new AuthResponse { loginResult = resultData, accessToken = token };
             return Results.Ok(responseData);

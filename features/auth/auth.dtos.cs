@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 public record AuthResponse
 {
-    public LoginResult loginResult { get; set; } = null!;
+    public LoginResult? loginResult { get; set; } = null!;
     public string accessToken { get; set; } = null!;
 };
 

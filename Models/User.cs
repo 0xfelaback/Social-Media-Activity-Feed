@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 [Index(nameof(UserName), IsUnique = true)]
@@ -84,7 +85,9 @@ public class Follow
 {
     public long FollowerID { get; set; }
     public long FollowedUserID { get; set; }
+    [JsonIgnore]
     public User Follower { get; set; } = null!;
+    [JsonIgnore]
     public User Followed { get; set; } = null!;
 }
 
@@ -92,8 +95,10 @@ public class Follow
 public class BlockedAccount
 {
     public long BlockingUserID { get; set; }
+    [JsonIgnore]
     public User BlockingUser { get; set; } = null!;
     public long BlockedAccountId { get; set; }
+    [JsonIgnore]
     public User Blocked_Account { get; set; } = null!;
 }
 
@@ -101,8 +106,10 @@ public class BlockedAccount
 public class CloseFriend
 {
     public long AddingUserID { get; set; }
+    [JsonIgnore]
     public User AddingUser { get; set; } = null!;
 
     public long CloseFriendAccountId { get; set; }
+    [JsonIgnore]
     public User CloseFriendAccount { get; set; } = null!;
 }

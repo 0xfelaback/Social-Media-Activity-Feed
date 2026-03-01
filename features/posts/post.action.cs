@@ -5,42 +5,42 @@ public static class PostAction
 {
     public static void UsePostActionEndpoints(this WebApplication app)
     {
+
         app.MapPost("/api/posts", async (PostRequest postRequest, SocialMediaDataContext context) =>
-{
-    //User? initiator = await context.Users.Where(u => u.UserName == postRequest.userName).FirstOrDefaultAsync();
-    var creator = await context.Users.Where(u => u.UserName == postRequest.userName).Select(s => new
-    {
-        s.UserID,
-        isAccountOwner = s.UserName == postRequest.userName
-    }
-    ).FirstOrDefaultAsync();
-    if (creator is null) return Results.NotFound("This account does not exist");
-    if (!creator.isAccountOwner) return Results.Conflict("Post cannot be made on an account by another");
-    List<PostMedia> postMedias = new List<PostMedia>();
-    for (int i = 0; i < postRequest.PostMediasLinkInputs.Count; i++)
-    {
-        PostMedia media = new PostMedia
         {
-            MediaURL = postRequest.PostMediasLinkInputs[i].mediaURL,
-            MediaType = (PostMedia.Media_Type?)postRequest.PostMediasLinkInputs[i].mediaType
-        };
-        postMedias.Add(media);
-    }
-    Post newPost = new Post
-    {
-        InitiatorID = creator.UserID,
-        Caption = postRequest.caption,
-        CreatedAt = DateTime.Now,
-        LikeCount = default,
-        PostMediasLinks = postMedias,
-        isDeleted = default
-    };
+            var creator = await context.Users.Where(u => u.UserName == postRequest.userName).Select(s => new
+            {
+                s.UserID,
+                isAccountOwner = s.UserName == postRequest.userName
+            }
+            ).FirstOrDefaultAsync();
+            if (creator is null) return Results.NotFound("This account does not exist");
+            if (!creator.isAccountOwner) return Results.Conflict("Post cannot be made on an account by another");
+            List<PostMedia> postMedias = new List<PostMedia>();
+            for (int i = 0; i < postRequest.PostMediasLinkInputs.Count; i++)
+            {
+                PostMedia media = new PostMedia
+                {
+                    MediaURL = postRequest.PostMediasLinkInputs[i].mediaURL,
+                    MediaType = (PostMedia.Media_Type?)postRequest.PostMediasLinkInputs[i].mediaType
+                };
+                postMedias.Add(media);
+            }
+            Post newPost = new Post
+            {
+                InitiatorID = creator.UserID,
+                Caption = postRequest.caption,
+                CreatedAt = DateTime.Now,
+                LikeCount = default,
+                PostMediasLinks = postMedias,
+                isDeleted = default
+            };
 
-    await context.Posts.AddAsync(newPost);
-    await context.SaveChangesAsync();
-    return Results.Created();
-}).RequireAuthorization();
 
+            await context.Posts.AddAsync(newPost);
+            await context.SaveChangesAsync();
+            return Results.Created();
+        }).RequireAuthorization();
 
         app.MapDelete("/api/posts/{id}", async (long id, [FromBody] PostDeleteRequest postDeleteRequest, SocialMediaDataContext context) =>
         {
@@ -49,7 +49,7 @@ public static class PostAction
             Post? postToDelete = await context.Posts.Where(p => p.PostID == id).FirstOrDefaultAsync();
             if (postToDelete is null) return Results.NotFound("This post does not exist");
             if (initiatorID != postToDelete.InitiatorID) return Results.Conflict("This user does not own the post");
-
+            if (postToDelete.isDeleted == true) return Results.Forbid();
 
             //soft delete 
             postToDelete.isDeleted = true;
@@ -57,6 +57,76 @@ public static class PostAction
             await context.SaveChangesAsync();
             return Results.NoContent();
         }).RequireAuthorization();
+
+        app.MapPost("/api/posts/{id}/restore", async (long id, PostDeleteRequest postDeleteRequest, SocialMediaDataContext context) =>
+        {
+            long initiatorID = await context.Users.Where(u => u.UserName == postDeleteRequest.userName).Select(i => i.UserID).FirstOrDefaultAsync();
+            if (initiatorID < 1) return Results.NotFound("This account does not exist");
+            Post? postToDelete = await context.Posts.Where(p => p.PostID == id).FirstOrDefaultAsync();
+            if (postToDelete is null) return Results.NotFound("This post does not exist");
+            if (initiatorID != postToDelete.InitiatorID) return Results.Conflict("This user does not own the post");
+            if (postToDelete.isDeleted != true) return Results.Forbid();
+
+            postToDelete.isDeleted = false;
+            postToDelete.DeletedAt = null;
+            await context.SaveChangesAsync();
+            return Results.NoContent();
+        }).RequireAuthorization();
+
+        app.MapGet("/api/posts/{id}", async (long id, [FromBody] PostViewRequest postViewRequest, SocialMediaDataContext context) =>
+        {
+            var result = context.Posts.Where(p => p.PostID == id).Select(s => new
+            {
+                postSaves = s.Saves,
+                postOwnerId = s.InitiatorID,
+                postId = s.PostID,
+                postIsDeleted = s.isDeleted,
+                postCreatedAt = s.CreatedAt,
+                postLikeCount = s.LikeCount,
+                postCaption = s.Caption,
+                postComments = s.Comments,
+                postMediaLinks = s.PostMediasLinks,
+                postOwnerPfp = s.Initiator.ProfileImage_MediaUrl,
+                postOwnerUserName = s.Initiator.UserName,
+                postInitiatorAccountBlockedBy = s.Initiator.AccountBlockedBy,
+                ViewerUserId = context.Users.Where(u => u.UserName == postViewRequest.userName).Select(s => s.UserID).FirstOrDefault(),
+            }).Select(sa => new
+            {
+                PostOwnerPfp = sa.postOwnerPfp,
+                PostOwnerUsername = sa.postOwnerUserName,
+                sa.postCreatedAt,
+                sa.postIsDeleted,
+                sa.postLikeCount,
+                sa.postCaption,
+                comments = sa.postComments,
+                media = sa.postMediaLinks,
+                isBlocked = sa.postInitiatorAccountBlockedBy.Any(b =>
+                    (b.BlockingUserID == sa.ViewerUserId && b.BlockedAccountId == sa.ViewerUserId) ||
+                    (b.BlockingUserID == sa.ViewerUserId && b.BlockedAccountId == sa.ViewerUserId)),
+                isPostSaved = sa.postSaves.Any(s => s.PostID == sa.postId && s.SaverID == sa.ViewerUserId)
+            }).AsNoTracking().FirstOrDefault();
+            if (result is null) return Results.NotFound("This post does not exist");
+            if (result.postIsDeleted) return Results.NotFound("This post has been deleted");
+            if (result.isBlocked) return Results.NotFound("Action cannot be completed due to a block.");
+
+            List<Comment> commentsInPost = result.comments.ToList();
+            List<PostMedia> mediaInPost = result.media.ToList();
+
+            PostViewResponse postViewResponse = new PostViewResponse
+            {
+                postOwnerUserName = result.PostOwnerUsername,
+                postOwnerPfpUrl = result.PostOwnerPfp ?? "http://default/defaultPfp.png",
+                DateCreated = result.postCreatedAt,
+                LikesCount = result.postLikeCount,
+                postCaption = result.postCaption,
+                postMedias = mediaInPost,
+                postComments = commentsInPost,
+                isSaved = result.isPostSaved
+            };
+
+
+            return Results.Ok(postViewResponse);
+        });
 
 
         app.MapPost("/api/posts/{id}/like", async (long id, PostLikeRequest postLikeRequest, SocialMediaDataContext context) =>
@@ -132,27 +202,26 @@ public static class PostAction
 
         app.MapPost("/api/posts/{id}/comment", async (int id, PostCommentRequest postCommentRequest, SocialMediaDataContext context) =>
 {
-
     var result = await context.Posts.Where(p => p.PostID == id).Select(p => new
     {
-        Post = p,
+        p.PostID,
         PostOwnerId = p.InitiatorID,
-        commenterID = context.Users.First(u => u.UserName == postCommentRequest.userName).UserID,
+        accountsBlockedBy = p.Initiator.AccountBlockedBy,
+        commenterID = context.Users.Where(u => u.UserName == postCommentRequest.userName).Select(s => s.UserID).FirstOrDefault(),
     })
     .Select(s =>
         new
         {
-            PostId = s.Post.PostID,
+            PostId = s.PostID,
             s.commenterID,
-            IsBlocked = s.Post.Initiator.AccountBlockedBy.Any(b => b.BlockingUserID == s.commenterID && b.BlockedAccountId == s.PostOwnerId) || s.Post.Initiator.AccountBlockedBy.Any(b => b.BlockingUserID == s.PostOwnerId && b.BlockedAccountId == s.commenterID)
+            s.PostOwnerId,
+            IsBlocked = s.accountsBlockedBy.Any(b => b.BlockingUserID == s.commenterID && b.BlockedAccountId == s.PostOwnerId) || s.accountsBlockedBy.Any(b => b.BlockingUserID == s.PostOwnerId && b.BlockedAccountId == s.commenterID)
         }
     )
     .FirstOrDefaultAsync();
 
     if (result is null) return Results.NotFound("This post does not exist");
     if (result.commenterID < 1) return Results.NotFound("This account does not exist");
-
-
     if (result.IsBlocked) return Results.NotFound("Action cannot be completed due to a block.");
 
     Comment newComment = new Comment
@@ -166,7 +235,7 @@ public static class PostAction
     };
     Notification notificationAction = new Notification
     {
-        ReceivingUserID = result.PostId,
+        ReceivingUserID = result.PostOwnerId,
         InitaiatorID = result.commenterID,
         NotificationType = Notification.NotifType.Comment,
         CreatedAt = DateTime.Now
@@ -189,9 +258,8 @@ public static class PostAction
 
             var result = await context.Posts.Where(u => u.PostID == id).Select(p => new
             {
-                PostID = p.PostID,
+                p.PostID,
                 PostOwnerID = p.InitiatorID,
-
                 IsBlocked = p.Initiator.AccountBlockedBy.Any(b => b.BlockedAccountId == p.InitiatorID && b.BlockingUserID == commenterID) ||
                 p.Initiator.BlockedAccounts.Any(b => b.BlockedAccountId == commenterID && b.BlockingUserID == p.InitiatorID)
             }).FirstOrDefaultAsync();
@@ -217,7 +285,6 @@ public static class PostAction
             await context.SaveChangesAsync();
             return Results.NoContent();
         }).RequireAuthorization();
-
 
         app.MapPost("/api/posts/{id}/save", async (long id, PostSaveRequest postSaveRequest, SocialMediaDataContext context) =>
 {

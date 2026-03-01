@@ -66,10 +66,11 @@ public class Notification
     public User Initaiator { get; set; } = null!;
     public enum NotifType
     {
-        Follow, Like, Comment
+        Follow,
+        Like,
+        Comment
     }
     [Required(ErrorMessage = "Please specify a valid Notification Type")]
-    public NotifType? NotificationType { get; set; }
+    public NotifType NotificationType { get; set; }
     public DateTime CreatedAt { get; set; }
-
 }

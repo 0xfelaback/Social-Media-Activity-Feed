@@ -3,10 +3,21 @@ using System.Text.Json.Serialization;
 
 public record PostViewResponse
 {
-    public required string author { get; set; }
-    public required DateTime createdAt { get; set; }
-    public required string ProfileImage_MediaUrl { get; set; }
-    public int LikeCount { get; set; }
+    [Url]
+    public required string postOwnerPfpUrl { get; set; }
+    public required string postOwnerUserName { get; set; }
+    public required DateTime DateCreated { get; set; }
+
+    public required int LikesCount { get; set; }
+    public required string postCaption { get; set; }
+    public required List<PostMedia> postMedias { get; set; }
+    public required List<Comment> postComments { get; set; }
+    public required bool isSaved { get; set; }
+}
+
+public record PostViewRequest
+{
+    public required string userName { get; set; }
 }
 
 public record PostDeleteRequest

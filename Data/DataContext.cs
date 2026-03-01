@@ -46,6 +46,8 @@ public class SocialMediaDataContext(DbContextOptions<SocialMediaDataContext> opt
         modelBuilder.Entity<Message>().HasOne(m => m.Sender).WithMany(m => m.MessagesSent).HasForeignKey(fk => fk.SenderID).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Message>().HasOne(m => m.Receiptient).WithMany(m => m.MessagesReceived).HasForeignKey(fk => fk.ReceiptientID).OnDelete(DeleteBehavior.Restrict);
 
-
     }
+
+    /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    => optionsBuilder.LogTo(Console.WriteLine);*/
 }
